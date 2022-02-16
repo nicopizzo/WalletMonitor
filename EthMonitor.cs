@@ -31,10 +31,18 @@ namespace WalletMonitor
 
         public async Task StartWatchingAsync()
         {
+            _Logger.LogInformation($"Starting account watch on Chain {_Options.ChainId} - {_Options.NodeHTTP}");
             var account = _Web3.Eth.TransactionManager.Account.Address;
             BigInteger ethBalance = await CheckAccountBalance(account);
+            _Logger.LogInformation($"Watching {account} and will send to {_Options.AddressToSend}");
+            int count = 0;
             while (true)
             {
+                if(count == 720)
+                {
+                    _Logger.LogInformation($"Im still alive...");
+                    count = 0;
+                }
                 try
                 {
                     var currentBal = await CheckAccountBalance(account);
@@ -51,6 +59,7 @@ namespace WalletMonitor
                     _Logger.LogError(ex, "Something failed");
                 }
                 await Task.Delay(5000);
+                count++;
             }
         }
 
